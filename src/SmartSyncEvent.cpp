@@ -70,7 +70,7 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		timer = millis();
 
 		#ifdef ESP32
-			ESP_LOGD("SmartSyncEvent", "Event with ID: %X triggered", event_id);
+			ESP_LOGV("SmartSyncEvent", "Event with ID: %X triggered", event_id);
 		#endif
 	}
 
@@ -96,6 +96,10 @@ void SmartSyncEvent::reset(unsigned int event_id) {
 	}
 
 	#ifdef ESP32
+		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been reset", event_id);
+	#endif
+
+	#ifdef ESP32
 		xSemaphoreGive(mutex);
 	#endif
 }
@@ -108,6 +112,10 @@ void SmartSyncEvent::disable(unsigned int event_id) {
 	id_to_status[event_id] = false;
 
 	#ifdef ESP32
+		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been disabled", event_id);
+	#endif
+
+	#ifdef ESP32
 		xSemaphoreGive(mutex);
 	#endif
 }
@@ -118,6 +126,10 @@ void SmartSyncEvent::enable(unsigned int event_id) {
 	#endif
 
 	id_to_status[event_id] = true;
+
+	#ifdef ESP32
+		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been enabled", event_id);
+	#endif
 
 	#ifdef ESP32
 		xSemaphoreGive(mutex);
