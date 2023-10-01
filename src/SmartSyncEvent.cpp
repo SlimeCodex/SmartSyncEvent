@@ -18,7 +18,7 @@
 
 #include "SmartSyncEvent.h"
 
-std::map<unsigned int, unsigned long> SmartSyncEvent::id_to_timer;
+std::map<unsigned int, EventInfo> id_to_info;
 
 #ifdef ESP32
 	SemaphoreHandle_t SmartSyncEvent::mutex = xSemaphoreCreateMutex();
@@ -46,18 +46,24 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	unsigned long& timer = id_to_timer[event_id];
+	EventInfo& event_info = id_to_info[event_id];
 
-	if (id_to_timer.size() > MAX_INSTANCES) {
+	if (id_to_info.size() > MAX_INSTANCES) {
 		#ifdef ESP32
 			xSemaphoreGive(mutex);
+			ESP_LOGW("SmartSyncEvent", "Too many unique sync events instances. Consider expanding MAX_INSTANCES buffer.");
 		#endif
-		return false; // Too many unique sync events
+		return false;
 	}
 
-	bool shouldTrigger = (millis() - timer > ms);
+	bool shouldTrigger = (millis() - event_info.timer > ms);
 	if (shouldTrigger) {
-		timer = millis();
+		event_info.timer = millis();
+		
+		// Log the event triggering with file and line info
+		#ifdef ESP32
+			ESP_LOGD("SmartSyncEvent", "Event with ID: %u triggered at %s:%d", event_id, event_info.file.c_str(), event_info.line);
+		#endif
 	}
 
 	#ifdef ESP32
@@ -69,6 +75,12 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
 	unsigned int event_id = get_id(file, line);
 	bool wasTriggered = trigger_id(ms, event_id);
+
+	// Only set file and line if it's a new event
+	if (id_to_info.find(event_id) == id_to_info.end()) {
+		id_to_info[event_id].file = file;
+		id_to_info[event_id].line = line;
+	}
 	return {wasTriggered, event_id};
 }
 
@@ -77,8 +89,8 @@ void SmartSyncEvent::reset(unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	if (id_to_timer.find(event_id) != id_to_timer.end()) {
-		id_to_timer[event_id] = millis();
+	if (id_to_info.find(event_id) != id_to_info.end()) {
+		id_to_info[event_id].timer = millis();
 	}
 
 	#ifdef ESP32

@@ -24,19 +24,6 @@
 #include <map>
 
 class SmartSyncEvent {
-private:
-	static const int MAX_INSTANCES = 64;
-
-	static std::map<unsigned int, unsigned long> id_to_timer;
-
-	#ifdef ESP32
-		#include "freertos/semphr.h"
-		static SemaphoreHandle_t mutex;  // Semaphore for thread safety
-	#endif
-
-	static unsigned int get_id(const std::string& file, int line);
-	static bool trigger_id(int ms, unsigned int event_id);
-
 public:
 	SmartSyncEvent();
 	~SmartSyncEvent();
@@ -53,6 +40,25 @@ public:
 
 	static Result trigger(int ms, const std::string& file, int line);
 	static void reset(unsigned int event_id);
+	
+private:
+	static const int MAX_INSTANCES = 64;
+
+	struct EventInfo {
+		unsigned long timer;
+		std::string file;
+		int line;
+	};
+
+	std::map<unsigned int, EventInfo> id_to_info;
+
+	#ifdef ESP32
+		#include "freertos/semphr.h"
+		static SemaphoreHandle_t mutex;  // Semaphore for thread safety
+	#endif
+
+	static unsigned int get_id(const std::string& file, int line);
+	static bool trigger_id(int ms, unsigned int event_id);
 };
 
 #define SYNC_EVENT(ms) SmartSyncEvent::trigger(ms, __FILE__, __LINE__)
