@@ -1,0 +1,10 @@
+name=SmartSyncEvent
+version=1.0.0
+author=Alejandro Nicolini <scrams@live.cl>
+maintainer=Alejandro Nicolini <scrams@live.cl>
+sentence=Thread-safe event management for synchronous tasks.
+paragraph=This library provides a mechanism to handle synchronous events with ease and safety, supporting ESP32's multithreading environment.
+category=Data Processing
+url=https://github.com/SlimeCodex/SmartSyncEvent
+architectures=*
+repository=https://github.com/SlimeCodex/SmartSyncEvent
