@@ -39,7 +39,7 @@ lib_deps =
 
 ### Triggering an Event
 
-Utilize the SYNC_EVENT(ms) macro. This returns a Result struct, which can be implicitly cast to bool to verify if the event was triggered. Moreover, the event's unique ID can be accessed with the .eventID member.
+Utilize the `SYNC_EVENT(ms)` macro. This returns a Result struct, which can be implicitly cast to bool to verify if the event was triggered. Moreover, the event's unique ID can be accessed with the .eventID member.
 
 ```cpp
 if (SYNC_EVENT(500)) {
