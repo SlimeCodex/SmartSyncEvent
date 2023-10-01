@@ -44,17 +44,11 @@ public:
 private:
 	static const int MAX_INSTANCES = 64;
 
-	struct EventInfo {
-		unsigned long timer;
-		std::string file;
-		int line;
-	};
-
-	std::map<unsigned int, EventInfo> id_to_info;
+	static std::map<unsigned int, unsigned long> id_to_timer;
 
 	#ifdef ESP32
 		#include "freertos/semphr.h"
-		static SemaphoreHandle_t mutex;  // Semaphore for thread safety
+		static SemaphoreHandle_t mutex; // Semaphore
 	#endif
 
 	static unsigned int get_id(const std::string& file, int line);

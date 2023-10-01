@@ -18,7 +18,7 @@
 
 #include "SmartSyncEvent.h"
 
-std::map<unsigned int, EventInfo> id_to_info;
+std::map<unsigned int, unsigned long> SmartSyncEvent::id_to_timer;
 
 #ifdef ESP32
 	SemaphoreHandle_t SmartSyncEvent::mutex = xSemaphoreCreateMutex();
@@ -46,9 +46,9 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	EventInfo& event_info = id_to_info[event_id];
+	unsigned long& timer = id_to_timer[event_id];
 
-	if (id_to_info.size() > MAX_INSTANCES) {
+	if (id_to_timer.size() > MAX_INSTANCES) {
 		#ifdef ESP32
 			xSemaphoreGive(mutex);
 			ESP_LOGW("SmartSyncEvent", "Too many unique sync events instances. Consider expanding MAX_INSTANCES buffer.");
@@ -56,31 +56,24 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		return false;
 	}
 
-	bool shouldTrigger = (millis() - event_info.timer > ms);
-	if (shouldTrigger) {
-		event_info.timer = millis();
-		
-		// Log the event triggering with file and line info
+	bool trigger_status = (millis() - timer > ms);
+	if (trigger_status) {
+		timer = millis();
+
 		#ifdef ESP32
-			ESP_LOGD("SmartSyncEvent", "Event with ID: %u triggered at %s:%d", event_id, event_info.file.c_str(), event_info.line);
+			ESP_LOGD("SmartSyncEvent", "Event with ID: %X triggered", event_id);
 		#endif
 	}
 
 	#ifdef ESP32
 		xSemaphoreGive(mutex);
 	#endif
-	return shouldTrigger;
+	return trigger_status;
 }
 
 SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
 	unsigned int event_id = get_id(file, line);
 	bool wasTriggered = trigger_id(ms, event_id);
-
-	// Only set file and line if it's a new event
-	if (id_to_info.find(event_id) == id_to_info.end()) {
-		id_to_info[event_id].file = file;
-		id_to_info[event_id].line = line;
-	}
 	return {wasTriggered, event_id};
 }
 
@@ -89,8 +82,8 @@ void SmartSyncEvent::reset(unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	if (id_to_info.find(event_id) != id_to_info.end()) {
-		id_to_info[event_id].timer = millis();
+	if (id_to_timer.find(event_id) != id_to_timer.end()) {
+		id_to_timer[event_id] = millis();
 	}
 
 	#ifdef ESP32
