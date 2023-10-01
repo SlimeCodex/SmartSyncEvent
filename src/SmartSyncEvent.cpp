@@ -21,13 +21,18 @@
 #include "SmartSyncEvent.h"
 
 std::map<unsigned int, unsigned long> SmartSyncEvent::id_to_timer;
-SemaphoreHandle_t SmartSyncEvent::mutex = xSemaphoreCreateMutex();
+
+#ifdef ESP32
+    SemaphoreHandle_t SmartSyncEvent::mutex = xSemaphoreCreateMutex();
+#endif
 
 SmartSyncEvent::SmartSyncEvent() {
 }
 
 SmartSyncEvent::~SmartSyncEvent() {
-    vSemaphoreDelete(mutex);
+    #ifdef ESP32
+        vSemaphoreDelete(mutex); // Cleanup for ESP32
+    #endif
 }
 
 unsigned int SmartSyncEvent::get_id(const std::string& file, int line) {
@@ -39,12 +44,17 @@ unsigned int SmartSyncEvent::get_id(const std::string& file, int line) {
 }
 
 bool SmartSyncEvent::trigger_id(int ms, unsigned int eventID) {
-    xSemaphoreTake(mutex, portMAX_DELAY);
+    #ifdef ESP32
+        xSemaphoreTake(mutex, portMAX_DELAY);
+    #endif
+
     unsigned long& timer = id_to_timer[eventID];
 
     if (id_to_timer.size() > MAX_INSTANCES) {
-        xSemaphoreGive(mutex);
-        return false;
+        #ifdef ESP32
+            xSemaphoreGive(mutex);
+        #endif
+        return false; // Too many unique sync events
     }
 
     bool shouldTrigger = (millis() - timer > ms);
@@ -52,7 +62,9 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int eventID) {
         timer = millis();
     }
 
-    xSemaphoreGive(mutex);
+    #ifdef ESP32
+        xSemaphoreGive(mutex);
+    #endif
     return shouldTrigger;
 }
 
@@ -63,9 +75,15 @@ SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, 
 }
 
 void SmartSyncEvent::reset(unsigned int eventID) {
-    xSemaphoreTake(mutex, portMAX_DELAY);
+    #ifdef ESP32
+        xSemaphoreTake(mutex, portMAX_DELAY);
+    #endif
+
     if (id_to_timer.find(eventID) != id_to_timer.end()) {
         id_to_timer[eventID] = millis();
     }
-    xSemaphoreGive(mutex);
+
+    #ifdef ESP32
+        xSemaphoreGive(mutex);
+    #endif
 }
