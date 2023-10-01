@@ -31,13 +31,13 @@ lib_deps =
 
 ## Usage
 
-## Including the Library
+### Including the Library
 
 ```cpp
 #include "SmartSyncEvent.h"
 ```
 
-## Triggering an Event
+### Triggering an Event
 
 Utilize the SYNC_EVENT(ms) macro. This returns a Result struct, which can be implicitly cast to bool to verify if the event was triggered. Moreover, the event's unique ID can be accessed with the .eventID member.
 
@@ -47,7 +47,7 @@ if (SYNC_EVENT(500)) {
 }
 ```
 
-## Manually Resetting an Event Timer
+### Manually Resetting an Event Timer
 
 For manual timer resets of any sync event, use its unique ID.
 
@@ -55,7 +55,7 @@ For manual timer resets of any sync event, use its unique ID.
 SmartSyncEvent::reset(eventID);
 ```
 
-## Retrieving the Event ID Directly
+### Retrieving the Event ID Directly
 
 Directly obtain a unique ID for an event:
 
