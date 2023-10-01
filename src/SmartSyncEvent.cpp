@@ -1,22 +1,20 @@
-/**
- * Copyright (C) 2023 Alejandro Nicolini
- * 
- * This file is part of SmartSyncEvent.
- * 
- * SmartSyncEvent is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * SmartSyncEvent is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with SmartSyncEvent.  If not, see <https://www.gnu.org/licenses/>.
- * 
-**/
+/*
+* This file is part of SmartSyncEvent Library.
+* Copyright (C) 2023 Alejandro Nicolini
+* 
+* SmartSyncEvent is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* SmartSyncEvent is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with SmartSyncEvent. If not, see <https://www.gnu.org/licenses/>.
+*/
 
 #include "SmartSyncEvent.h"
 
@@ -43,12 +41,12 @@ unsigned int SmartSyncEvent::get_id(const std::string& file, int line) {
 	return hash + line;
 }
 
-bool SmartSyncEvent::trigger_id(int ms, unsigned int eventID) {
+bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 	#ifdef ESP32
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	unsigned long& timer = id_to_timer[eventID];
+	unsigned long& timer = id_to_timer[event_id];
 
 	if (id_to_timer.size() > MAX_INSTANCES) {
 		#ifdef ESP32
@@ -69,18 +67,18 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int eventID) {
 }
 
 SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
-	unsigned int eventID = get_id(file, line);
-	bool wasTriggered = trigger_id(ms, eventID);
-	return {wasTriggered, eventID};
+	unsigned int event_id = get_id(file, line);
+	bool wasTriggered = trigger_id(ms, event_id);
+	return {wasTriggered, event_id};
 }
 
-void SmartSyncEvent::reset(unsigned int eventID) {
+void SmartSyncEvent::reset(unsigned int event_id) {
 	#ifdef ESP32
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	if (id_to_timer.find(eventID) != id_to_timer.end()) {
-		id_to_timer[eventID] = millis();
+	if (id_to_timer.find(event_id) != id_to_timer.end()) {
+		id_to_timer[event_id] = millis();
 	}
 
 	#ifdef ESP32
