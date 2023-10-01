@@ -8,12 +8,6 @@ The `SmartSyncEvent` library provides a convenient way to manage timed events in
 - **Thread Safety**: Provides thread-safe handling for ESP32 projects.
 - **Convenience**: Utilize through a simple macro for triggering events.
 
-## Installation as ZIP file
-
-1. Download the library as a zip file.
-2. Open your Arduino IDE or PlatformIO.
-3. Add the library via the respective "Add Library" feature.
-
 ## Installation using PlatformIO
 
 PlatformIO offers a streamlined way to manage your project dependencies.
