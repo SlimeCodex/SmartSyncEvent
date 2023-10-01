@@ -19,6 +19,7 @@
 #include "SmartSyncEvent.h"
 
 std::map<unsigned int, unsigned long> SmartSyncEvent::id_to_timer;
+std::map<unsigned int, bool> SmartSyncEvent::id_to_status;
 
 #ifdef ESP32
 	SemaphoreHandle_t SmartSyncEvent::mutex = xSemaphoreCreateMutex();
@@ -46,6 +47,14 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
+	// Check enabled or disabled event
+	if (id_to_status.find(event_id) != id_to_status.end() && !id_to_status[event_id]) {
+		#ifdef ESP32
+			xSemaphoreGive(mutex);
+		#endif
+		return false;
+	}
+
 	unsigned long& timer = id_to_timer[event_id];
 
 	if (id_to_timer.size() > MAX_INSTANCES) {
@@ -69,6 +78,30 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		xSemaphoreGive(mutex);
 	#endif
 	return trigger_status;
+}
+
+void SmartSyncEvent::disable(unsigned int event_id) {
+	#ifdef ESP32
+		xSemaphoreTake(mutex, portMAX_DELAY);
+	#endif
+
+	id_to_status[event_id] = false;
+
+	#ifdef ESP32
+		xSemaphoreGive(mutex);
+	#endif
+}
+
+void SmartSyncEvent::enable(unsigned int event_id) {
+	#ifdef ESP32
+		xSemaphoreTake(mutex, portMAX_DELAY);
+	#endif
+
+	id_to_status[event_id] = true;
+
+	#ifdef ESP32
+		xSemaphoreGive(mutex);
+	#endif
 }
 
 SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
