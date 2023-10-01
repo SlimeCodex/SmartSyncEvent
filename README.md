@@ -23,7 +23,7 @@ lib_deps =
 3. Save the platformio.ini file.
 4. Build your project. PlatformIO will automatically fetch and install the SmartSyncEvent library.
 
-## Usage
+## Basic Usage
 
 ### Including the Library
 
@@ -41,13 +41,7 @@ if (SYNC_EVENT(500)) {
 }
 ```
 
-### Manually Resetting an Event Timer
-
-For manual timer resets of any sync event, use its unique ID.
-
-```cpp
-SmartSyncEvent::reset(eventID);
-```
+## Advanced Usage
 
 ### Retrieving the Event ID Directly
 
@@ -55,7 +49,31 @@ Directly obtain a unique ID for an event:
 
 ```cpp
 auto result = SYNC_EVENT(1000);
-unsigned int id = result.eventID;
+unsigned int event_id = result.eventID;
+```
+
+### Resetting an Event Timer
+
+For manual timer resets of any sync event:
+
+```cpp
+SmartSyncEvent::reset(event_id);
+```
+
+### Enable an Event
+
+To enable a previously disabled event:
+
+```cpp
+SmartSyncEvent::enable(event_id);
+```
+
+### Disable an Event
+
+To disable a previously enabled event:
+
+```cpp
+SmartSyncEvent::disable(event_id);
 ```
 
 ## License
