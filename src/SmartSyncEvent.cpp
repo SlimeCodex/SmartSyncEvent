@@ -80,6 +80,26 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 	return trigger_status;
 }
 
+SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
+	unsigned int event_id = get_id(file, line);
+	bool wasTriggered = trigger_id(ms, event_id);
+	return {wasTriggered, event_id};
+}
+
+void SmartSyncEvent::reset(unsigned int event_id) {
+	#ifdef ESP32
+		xSemaphoreTake(mutex, portMAX_DELAY);
+	#endif
+
+	if (id_to_timer.find(event_id) != id_to_timer.end()) {
+		id_to_timer[event_id] = millis();
+	}
+
+	#ifdef ESP32
+		xSemaphoreGive(mutex);
+	#endif
+}
+
 void SmartSyncEvent::disable(unsigned int event_id) {
 	#ifdef ESP32
 		xSemaphoreTake(mutex, portMAX_DELAY);
@@ -98,26 +118,6 @@ void SmartSyncEvent::enable(unsigned int event_id) {
 	#endif
 
 	id_to_status[event_id] = true;
-
-	#ifdef ESP32
-		xSemaphoreGive(mutex);
-	#endif
-}
-
-SmartSyncEvent::Result SmartSyncEvent::trigger(int ms, const std::string& file, int line) {
-	unsigned int event_id = get_id(file, line);
-	bool wasTriggered = trigger_id(ms, event_id);
-	return {wasTriggered, event_id};
-}
-
-void SmartSyncEvent::reset(unsigned int event_id) {
-	#ifdef ESP32
-		xSemaphoreTake(mutex, portMAX_DELAY);
-	#endif
-
-	if (id_to_timer.find(event_id) != id_to_timer.end()) {
-		id_to_timer[event_id] = millis();
-	}
 
 	#ifdef ESP32
 		xSemaphoreGive(mutex);

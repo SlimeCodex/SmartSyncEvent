@@ -40,6 +40,8 @@ public:
 
 	static Result trigger(int ms, const std::string& file, int line);
 	static void reset(unsigned int event_id);
+	static void disable(unsigned int event_id);
+	static void enable(unsigned int event_id);
 	
 private:
 	static const int MAX_INSTANCES = 64;
@@ -54,8 +56,6 @@ private:
 
 	static unsigned int get_id(const std::string& file, int line);
 	static bool trigger_id(int ms, unsigned int event_id);
-	static void disable(unsigned int event_id);
-	static void enable(unsigned int event_id);
 };
 
 #define SYNC_EVENT(ms) SmartSyncEvent::trigger(ms, __FILE__, __LINE__)
