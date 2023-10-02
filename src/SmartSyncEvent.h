@@ -57,7 +57,6 @@ private:
 
 	static unsigned int get_id(const std::string& file, int line);
 	static bool trigger_id(int ms, unsigned int event_id);
-	static bool modify_event(unsigned int event_id, std::function<bool()> action, const char* logMessage);
 };
 
 #define SYNC_EVENT(ms) SmartSyncEvent::trigger(ms, __FILE__, __LINE__)
