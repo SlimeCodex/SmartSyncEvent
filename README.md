@@ -17,7 +17,7 @@ PlatformIO offers a streamlined way to manage your project dependencies.
 
 ```
 lib_deps =
-    https://github.com/SlimeCodex/SmartSyncEvent@^1.1.0
+    https://github.com/SlimeCodex/SmartSyncEvent@^1.3.0
 ```
 
 3. Save the platformio.ini file.
@@ -74,6 +74,14 @@ To disable a previously enabled event:
 
 ```cpp
 SmartSyncEvent::disable(event_id);
+```
+
+### Forcing an Event to Trigger
+
+The force method provides a way to manually enforce an event to trigger the next time it's checked, regardless of the time interval set during its creation.
+
+```cpp
+SmartSyncEvent::force(event_id);
 ```
 
 ## License

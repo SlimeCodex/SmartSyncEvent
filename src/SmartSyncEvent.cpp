@@ -91,9 +91,15 @@ void SmartSyncEvent::reset(unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
-	if (id_to_timer.find(event_id) != id_to_timer.end()) {
-		id_to_timer[event_id] = millis();
-	}
+    if (id_to_timer.find(event_id) == id_to_timer.end()) {
+        #ifdef ESP32
+			ESP_LOGV("SmartSyncEvent", "Unable to find event with ID: %X", event_id);
+            xSemaphoreGive(mutex);
+        #endif
+        return false;
+    }
+
+	id_to_timer[event_id] = millis();
 
 	#ifdef ESP32
 		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been reset", event_id);
@@ -109,13 +115,18 @@ void SmartSyncEvent::disable(unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
+    if (id_to_status.find(event_id) == id_to_status.end()) {
+        #ifdef ESP32
+			ESP_LOGV("SmartSyncEvent", "Unable to find event with ID: %X", event_id);
+            xSemaphoreGive(mutex);
+        #endif
+        return false;
+    }
+
 	id_to_status[event_id] = false;
 
 	#ifdef ESP32
 		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been disabled", event_id);
-	#endif
-
-	#ifdef ESP32
 		xSemaphoreGive(mutex);
 	#endif
 }
@@ -125,13 +136,41 @@ void SmartSyncEvent::enable(unsigned int event_id) {
 		xSemaphoreTake(mutex, portMAX_DELAY);
 	#endif
 
+    if (id_to_status.find(event_id) == id_to_status.end()) {
+        #ifdef ESP32
+			ESP_LOGV("SmartSyncEvent", "Unable to find event with ID: %X", event_id);
+            xSemaphoreGive(mutex);
+        #endif
+        return false;
+    }
+
 	id_to_status[event_id] = true;
 
 	#ifdef ESP32
 		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been enabled", event_id);
-	#endif
-
-	#ifdef ESP32
 		xSemaphoreGive(mutex);
 	#endif
+}
+
+void SmartSyncEvent::force(unsigned int event_id) {
+    #ifdef ESP32
+        xSemaphoreTake(mutex, portMAX_DELAY);
+    #endif
+
+    if (id_to_timer.find(event_id) == id_to_timer.end()) {
+        #ifdef ESP32
+			ESP_LOGV("SmartSyncEvent", "Unable to find event with ID: %X", event_id);
+            xSemaphoreGive(mutex);
+        #endif
+        return false;
+    }
+
+    id_to_timer[event_id] = 0;
+
+	#ifdef ESP32
+		ESP_LOGV("SmartSyncEvent", "Event with ID: %X has been forced", event_id);
+		xSemaphoreGive(mutex);
+	#endif
+
+    return true;
 }

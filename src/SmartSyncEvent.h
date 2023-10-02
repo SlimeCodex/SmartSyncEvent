@@ -42,7 +42,8 @@ public:
 	static void reset(unsigned int event_id);
 	static void disable(unsigned int event_id);
 	static void enable(unsigned int event_id);
-	
+	static void force(unsigned int event_id);
+
 private:
 	static const int MAX_INSTANCES = 64;
 
