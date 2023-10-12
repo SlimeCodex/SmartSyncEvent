@@ -70,7 +70,7 @@ bool SmartSyncEvent::trigger_id(int ms, unsigned int event_id) {
 		timer = millis();
 
 		#ifdef ESP32
-			ESP_LOGV("SmartSyncEvent", "Event with ID: %X triggered", event_id);
+			//ESP_LOGV("SmartSyncEvent", "Event with ID: %X triggered", event_id);
 		#endif
 	}
 
